@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual Environment
+venv-reco/
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+
+# macOS
+.DS_Store
+
+# Data files - we only need the artifacts in deployment_artifacts
+*.csv
+
+# Exclude the generated notebook
+recommendation_engine.ipynb
+
+# Keep necessary CSVs inside deployment_artifacts
+!deployment_artifacts/cleaned_master_data.csv
+!deployment_artifacts/city_coordinates.csv
+!deployment_artifacts/city_popularity.csv
+!deployment_artifacts/site_type_popularity.csv
