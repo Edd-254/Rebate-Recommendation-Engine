@@ -19,6 +19,10 @@ venv-reco/
 # Exclude the generated notebook
 recommendation_engine.ipynb
 
+# Documentation files (keep local only)
+Deployment Guide.md
+Project Implementation.md
+
 # Keep necessary CSVs inside deployment_artifacts
 !deployment_artifacts/cleaned_master_data.csv
 !deployment_artifacts/city_coordinates.csv
