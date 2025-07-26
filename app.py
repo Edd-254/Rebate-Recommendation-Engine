@@ -411,12 +411,37 @@ async def get_filtered_customers(
         # Format response
         customers = []
         for _, customer in filtered_df.iterrows():
+            # Handle request_date formatting
+            request_date = customer.get('Request Date', '')
+            request_year = None
+            
+            if request_date and request_date != '':
+                try:
+                    # Convert to datetime if it's not already
+                    if hasattr(request_date, 'strftime'):
+                        request_date_str = request_date.strftime('%Y-%m-%d')
+                        request_year = request_date.year
+                    else:
+                        # Handle string dates
+                        from datetime import datetime
+                        parsed_date = datetime.strptime(str(request_date)[:10], '%Y-%m-%d')
+                        request_date_str = parsed_date.strftime('%Y-%m-%d')
+                        request_year = parsed_date.year
+                except:
+                    request_date_str = ''
+                    request_year = None
+            else:
+                request_date_str = ''
+                request_year = None
+            
             customers.append({
                 'site_id': customer['Site ID'],
                 'customer_name': customer.get('Customer Name', ''),
                 'city': customer.get('City', ''),
                 'site_type': customer.get('Site Type', ''),
-                'email': customer.get('Email Address', '')
+                'email': customer.get('Email Address', ''),
+                'request_date': request_date_str,
+                'request_year': request_year
             })
         
         return {
@@ -458,9 +483,15 @@ async def export_filtered_customers(
         if missing_rebate and missing_rebate in rebate_columns:
             filtered_df = filtered_df[filtered_df[missing_rebate] == 0]
         
-        # Select export columns
-        export_columns = ['Site ID', 'Customer Name', 'City', 'Site Type', 'Email Address']
-        export_df = filtered_df[export_columns]
+        # Select export columns (including date fields)
+        export_columns = ['Site ID', 'Customer Name', 'City', 'Site Type', 'Email Address', 'Request Date']
+        export_df = filtered_df[export_columns].copy()
+        
+        # Add request_year column for consistency with API response
+        try:
+            export_df['Request Year'] = pd.to_datetime(export_df['Request Date']).dt.year
+        except:
+            export_df['Request Year'] = None
         
         # Generate CSV
         output = io.StringIO()
