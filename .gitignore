@@ -28,3 +28,6 @@ Project Implementation.md
 !deployment_artifacts/city_coordinates.csv
 !deployment_artifacts/city_popularity.csv
 !deployment_artifacts/site_type_popularity.csv
+
+# rebate.txt file
+rebate.txt

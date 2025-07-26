@@ -256,6 +256,23 @@ for code, new_col in rebate_mapping.items():
     df_master[new_col] = df_master['RebateType'].str.contains(code, na=False)
     print(f"  - Created '{new_col}' with {df_master[new_col].sum()} participants.")
 
+# Add rebate_count column - sum of all six boolean rebate columns
+rebate_cols_for_count = list(rebate_mapping.values()) + ['participated_in_graywater']
+print(f"\nComputing rebate_count column from: {rebate_cols_for_count}")
+
+# Ensure all rebate columns are boolean and handle any missing values
+for col in rebate_cols_for_count:
+    if col in df_master.columns:
+        df_master[col] = df_master[col].fillna(False).astype(bool)
+    else:
+        print(f"Warning: Column '{col}' not found, treating as False for all rows.")
+        df_master[col] = False
+
+# Calculate rebate_count as the sum of True values across all rebate columns
+df_master['rebate_count'] = df_master[rebate_cols_for_count].sum(axis=1)
+print(f"  - Created 'rebate_count' column with values ranging from {df_master['rebate_count'].min()} to {df_master['rebate_count'].max()}")
+print(f"  - Average rebates per customer: {df_master['rebate_count'].mean():.2f}")
+
 # Save the final, fully-featured dataset
 # Ensure all original and new columns are kept
 output_path = 'cleaned_master_data.csv'

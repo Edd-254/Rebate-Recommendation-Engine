@@ -512,6 +512,80 @@ async def export_filtered_customers(
         logger.error(f"Error exporting customers: {e}")
         raise HTTPException(status_code=500, detail="Internal server error")
 
+@app.get("/master-data")
+async def get_master_data(
+    format: Optional[str] = Query("json", description="Output format: 'json' or 'csv'")
+):
+    """
+    Get the full cleaned master data with all columns including rebate_count.
+    Supports both JSON and CSV output formats for Power BI integration.
+    """
+    try:
+        # Load the full cleaned master data
+        master_df = df_cleaned.copy()
+        
+        # Clean any NaN or infinite values for JSON serialization
+        master_df = master_df.fillna('')
+        master_df = master_df.replace([float('inf'), float('-inf')], '')
+        
+        if format.lower() == "csv":
+            # Return CSV format
+            output = io.StringIO()
+            master_df.to_csv(output, index=False)
+            output.seek(0)
+            
+            # Create filename with timestamp
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            filename = f"master_data_{timestamp}.csv"
+            
+            return StreamingResponse(
+                io.BytesIO(output.getvalue().encode('utf-8')),
+                media_type="text/csv",
+                headers={"Content-Disposition": f"attachment; filename={filename}"}
+            )
+        else:
+            # Return JSON format (default)
+            # Process date fields for JSON serialization
+            master_data = []
+            for _, row in master_df.iterrows():
+                # Handle request_date field
+                request_date_str = ''
+                request_year = None
+                if pd.notna(row.get('Request Date')):
+                    try:
+                        if isinstance(row['Request Date'], str):
+                            request_date_obj = pd.to_datetime(row['Request Date'])
+                        else:
+                            request_date_obj = row['Request Date']
+                        request_date_str = request_date_obj.strftime('%Y-%m-%d')
+                        request_year = request_date_obj.year
+                    except:
+                        request_date_str = str(row.get('Request Date', ''))
+                        request_year = None
+                
+                # Create record with all columns
+                record = {}
+                for col in master_df.columns:
+                    record[col] = row[col]
+                
+                # Add processed date fields
+                record['request_date'] = request_date_str
+                record['request_year'] = request_year
+                
+                master_data.append(record)
+            
+            return {
+                "master_data": master_data,
+                "total_records": len(master_data),
+                "columns": list(master_df.columns) + ['request_date', 'request_year'],
+                "format": "json",
+                "generated_at": datetime.now().isoformat()
+            }
+            
+    except Exception as e:
+        logger.error(f"Error retrieving master data: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error")
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
