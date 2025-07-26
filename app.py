@@ -382,8 +382,7 @@ async def get_filtered_customers(
     city: Optional[str] = Query(None, description="Filter by city"),
     site_type: Optional[str] = Query(None, description="Filter by site type"),
     has_rebate: Optional[str] = Query(None, description="Filter customers who have this rebate"),
-    missing_rebate: Optional[str] = Query(None, description="Filter customers missing this rebate"),
-    limit: int = Query(100, ge=1, le=1000, description="Maximum number of results")
+    missing_rebate: Optional[str] = Query(None, description="Filter customers missing this rebate")
 ):
     """Get filtered customer data for targeting and outreach."""
     try:
@@ -402,8 +401,8 @@ async def get_filtered_customers(
         if missing_rebate and missing_rebate in rebate_columns:
             filtered_df = filtered_df[filtered_df[missing_rebate] == 0]
         
-        # Limit results
-        filtered_df = filtered_df.head(limit)
+        # Get total count before formatting
+        total_count = len(filtered_df)
         
         # Format response
         customers = []
@@ -418,7 +417,7 @@ async def get_filtered_customers(
         
         return {
             "customers": customers,
-            "total_count": len(customers),
+            "total_count": total_count,
             "filters_applied": {
                 "city": city,
                 "site_type": site_type,
