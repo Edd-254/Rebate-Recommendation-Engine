@@ -401,6 +401,10 @@ async def get_filtered_customers(
         if missing_rebate and missing_rebate in rebate_columns:
             filtered_df = filtered_df[filtered_df[missing_rebate] == 0]
         
+        # Clean data to prevent JSON serialization errors
+        filtered_df = filtered_df.fillna('')  # Replace NaN with empty string
+        filtered_df = filtered_df.replace([float('inf'), float('-inf')], '')  # Replace inf with empty string
+        
         # Get total count before formatting
         total_count = len(filtered_df)
         
@@ -409,10 +413,10 @@ async def get_filtered_customers(
         for _, customer in filtered_df.iterrows():
             customers.append({
                 'site_id': customer['Site ID'],
-                'customer_name': customer.get('Customer Name'),
-                'city': customer.get('City'),
-                'site_type': customer.get('Site Type'),
-                'email': customer.get('Email Address')
+                'customer_name': customer.get('Customer Name', ''),
+                'city': customer.get('City', ''),
+                'site_type': customer.get('Site Type', ''),
+                'email': customer.get('Email Address', '')
             })
         
         return {
