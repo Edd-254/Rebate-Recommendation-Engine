@@ -41,15 +41,27 @@ print("Special handling: 2025 customers are retained even with blank RebateType\
 
 # Load Data - Application List and Current Landscape Rebates
 try:
-    df_app = pd.read_csv('Application List.csv', low_memory=False)
+    df_app = pd.read_csv('Application List.csv', low_memory=False, on_bad_lines='skip', encoding='utf-8', quoting=1, engine='python')
     print(f"Loaded Application List with {len(df_app)} initial rows.")
 except Exception as e:
     print(f"Error loading Application List.csv: {e}")
-    raise e
+    try:
+        # Try with different encoding and more aggressive error handling
+        df_app = pd.read_csv('Application List.csv', low_memory=False, on_bad_lines='skip', encoding='latin-1', quoting=1, engine='python', error_bad_lines=False)
+        print(f"Loaded Application List with {len(df_app)} initial rows (using latin-1 encoding).")
+    except Exception as e2:
+        print(f"Failed to load Application List.csv with both encodings: {e2}")
+        try:
+            # Final fallback with minimal parsing
+            df_app = pd.read_csv('Application List.csv', on_bad_lines='skip', encoding='utf-8', sep=',', quotechar='"', engine='python', skipinitialspace=True)
+            print(f"Loaded Application List with {len(df_app)} initial rows (using fallback parsing).")
+        except Exception as e3:
+            print(f"All CSV parsing attempts failed: {e3}")
+            raise e3
 
 # Load Current Landscape Rebates (2025 data) if available
 try:
-    df_current = pd.read_csv('Current Landscape Rebates.csv')
+    df_current = pd.read_csv('Current Landscape Rebates.csv', on_bad_lines='skip', encoding='utf-8', quoting=1, engine='python')
     print(f"Loaded Current Landscape Rebates with {len(df_current)} rows.")
     
     # Ensure both dataframes have the same columns for concatenation
@@ -76,8 +88,25 @@ VALID_STATUSES_2025 = ['Appl. Received Complete', 'Check Issued', 'Past Rebate',
                        'Notice to Proceed Sent', 'Post Insp. Approved']
 
 # Convert Request Date early for year-based filtering
-df_app['Request Date'] = pd.to_datetime(df_app['Request Date'], errors='coerce')
+# Robustly handle multiple date formats (MM/DD/YYYY, YYYY-MM-DD, etc.)
+from datetime import datetime
+
+def robust_parse_date(date_str):
+    for fmt in ("%Y-%m-%d", "%m/%d/%Y", "%Y/%m/%d", "%d-%b-%Y"):
+        try:
+            return datetime.strptime(str(date_str), fmt)
+        except (ValueError, TypeError):
+            continue
+    try:
+        # Try pandas' parser as fallback, but only on the single string
+        return pd.to_datetime(str(date_str), errors='coerce')
+    except Exception:
+        return pd.NaT
+
+parsed_dates = df_app['Request Date'].apply(robust_parse_date)
+df_app['Request Date'] = parsed_dates
 df_app.dropna(subset=['Request Date'], inplace=True)
+print(f"Parsed {len(df_app)} valid Request Dates out of {len(parsed_dates)} rows.")
 
 # Separate data by year for different status filtering
 df_app['Request Year'] = df_app['Request Date'].dt.year
@@ -109,7 +138,7 @@ initial_rows_nan = len(df_cleaned)
 
 # For 2025 data, keep all customers even if RebateType is blank
 # For older years, remove rows with missing RebateType as before
-df_cleaned['Request Year'] = pd.to_datetime(df_cleaned['Request Date']).dt.year
+df_cleaned['Request Year'] = df_cleaned['Request Date'].dt.year
 
 # Separate 2025 data from older data
 df_2025 = df_cleaned[df_cleaned['Request Year'] >= 2025].copy()
@@ -141,7 +170,7 @@ print(f"Removed {initial_rows_dup - final_rows_dup} duplicate rebate number entr
 print(f"Final dataset has {final_rows_dup} unique rebate applications.")
 
 # Check 2025 data inclusion
-final_2025_count = len(df_cleaned[pd.to_datetime(df_cleaned['Request Date']).dt.year >= 2025])
+final_2025_count = len(df_cleaned[df_cleaned['Request Date'].dt.year >= 2025])
 print(f"Final dataset includes {final_2025_count} applications from 2025 or later.")
 
 # Save Cleaned Data
@@ -153,6 +182,110 @@ master_df_final = df_cleaned[final_columns_exist]
 output_path = 'cleaned_master_data.csv'
 master_df_final.to_csv(output_path, index=False)
 print(f"Cleaned and deduplicated data saved to '{output_path}'.")"""
+
+# Cell 2.5: Include All Graywater Customers
+graywater_inclusion_code = r"""print("\n--- Including All Graywater Customers ---")
+print("This step ensures graywater-only customers are included in the master dataset.")
+
+# Load graywater data
+try:
+    df_graywater = pd.read_csv('Graywater Rebate.csv', low_memory=False, on_bad_lines='skip', encoding='utf-8', quoting=1, engine='python')
+    print(f"Loaded {len(df_graywater)} graywater customers.")
+except Exception as e:
+    print(f"Error loading Graywater Rebate.csv: {e}")
+    try:
+        # Try with different encoding and more aggressive error handling
+        df_graywater = pd.read_csv('Graywater Rebate.csv', low_memory=False, on_bad_lines='skip', encoding='latin-1', quoting=1, engine='python', error_bad_lines=False)
+        print(f"Loaded {len(df_graywater)} graywater customers (using latin-1 encoding).")
+    except Exception as e2:
+        print(f"Failed to load Graywater Rebate.csv with both encodings: {e2}")
+        try:
+            # Final fallback with minimal parsing
+            df_graywater = pd.read_csv('Graywater Rebate.csv', on_bad_lines='skip', encoding='utf-8', sep=',', quotechar='"', engine='python', skipinitialspace=True)
+            print(f"Loaded {len(df_graywater)} graywater customers (using fallback parsing).")
+        except Exception as e3:
+            print(f"All graywater CSV parsing attempts failed: {e3}")
+            df_graywater = pd.DataFrame()  # Empty dataframe if file not found
+
+if not df_graywater.empty:
+    # Load current master data
+    df_master = pd.read_csv('cleaned_master_data.csv', low_memory=False)
+    print(f"Current master data has {len(df_master)} records.")
+    
+    # Create standardized match strings for comparison
+    def standardize_text(text):
+        return str(text).lower().strip() if pd.notna(text) else ''
+    
+    # Create match strings for existing master data
+    df_master['temp_match_string'] = df_master['Customer Name'].apply(standardize_text) + ' ' + df_master.get('Address/Site', df_master.get('City', '')).apply(standardize_text)
+    
+    # Create match strings for graywater data
+    df_graywater['temp_match_string'] = df_graywater['Customer Name'].apply(standardize_text) + ' ' + df_graywater['Installation Address'].apply(standardize_text)
+    
+    # Find graywater customers NOT already in master data
+    existing_matches = set(df_master['temp_match_string'].tolist())
+    graywater_only = df_graywater[~df_graywater['temp_match_string'].isin(existing_matches)].copy()
+    
+    print(f"Found {len(graywater_only)} graywater-only customers to add.")
+    
+    if len(graywater_only) > 0:
+        # Create new records for graywater-only customers
+        new_records = []
+        
+        for _, gw_customer in graywater_only.iterrows():
+            # Generate a unique rebate number for graywater-only customers
+            # Use LRP Rebate Number if available, otherwise generate one
+            rebate_number = gw_customer.get('LRP Rebate Number', f"GW_{gw_customer.get('Rebate Number', 'UNKNOWN')}")
+            
+            # Create new record with available graywater data
+            new_record = {
+                'Rebate Number': rebate_number,
+                'Site ID': gw_customer.get('Site ID', ''),  # May be empty
+                'Customer Name': gw_customer.get('Customer Name', ''),
+                'Site Type': gw_customer.get('Site Type', ''),
+                'City': gw_customer.get('City', ''),
+                'Site Zip Code': str(gw_customer.get('Zip Code', '')).split('.')[0] if pd.notna(gw_customer.get('Zip Code')) else '',
+                'Request Date': gw_customer.get('Application Date', ''),
+                'Rebate Status': gw_customer.get('Status', 'Graywater Program'),
+                'RebateType': 'G',  # G for Graywater
+                'Email Address': gw_customer.get('Email', ''),  # This is the key benefit!
+            }
+            
+            # Add any other columns that exist in master data with empty values
+            for col in df_master.columns:
+                if col not in new_record and col != 'temp_match_string':
+                    new_record[col] = ''
+            
+            new_records.append(new_record)
+        
+        # Convert to DataFrame and append to master data
+        df_new_graywater = pd.DataFrame(new_records)
+        
+        # Remove temporary match string columns
+        df_master.drop('temp_match_string', axis=1, inplace=True)
+        
+        # Ensure column alignment
+        for col in df_master.columns:
+            if col not in df_new_graywater.columns:
+                df_new_graywater[col] = ''
+        
+        # Reorder columns to match master data
+        df_new_graywater = df_new_graywater[df_master.columns]
+        
+        # Append graywater-only customers to master data
+        df_master_enhanced = pd.concat([df_master, df_new_graywater], ignore_index=True)
+        
+        # Save enhanced master data
+        df_master_enhanced.to_csv('cleaned_master_data.csv', index=False)
+        
+        print(f"Added {len(new_records)} graywater-only customers to master data.")
+        print(f"Enhanced master data now has {len(df_master_enhanced)} total records.")
+        print(f"Graywater-only customers will have 'RebateType' = 'G' and populated email addresses.")
+    else:
+        print("No additional graywater-only customers found.")
+else:
+    print("No graywater data available - skipping graywater inclusion.")
+"""
 
 # Cell 3: Graywater Direct Match
 graywater_analysis_code = r"""print("\n--- Graywater Rebate Overlap Investigation ---")
@@ -193,14 +326,26 @@ df_graywater['match_string'] = df_graywater['Customer Name'].apply(standardize_t
 
 landscape_choices = df_landscape['match_string'].tolist()
 matches = []
+email_matches = {}  # Dictionary to store rebate_number -> email mapping
 match_threshold = 90
 
-for record in df_graywater['match_string']:
+for idx, record in enumerate(df_graywater['match_string']):
     best_match = process.extractOne(record, landscape_choices, scorer=fuzz.token_sort_ratio)
     if best_match and best_match[1] >= match_threshold:
         matches.append(best_match[0])
+        # Get the graywater record for this match to extract email
+        graywater_record = df_graywater.iloc[idx]
+        graywater_email = graywater_record.get('Email', '')
+        
+        # Find the corresponding landscape record to get rebate number
+        landscape_match = df_landscape[df_landscape['match_string'] == best_match[0]]
+        if not landscape_match.empty:
+            rebate_number = str(landscape_match.iloc[0]['Rebate Number'])
+            if pd.notna(graywater_email) and graywater_email.strip():
+                email_matches[rebate_number] = graywater_email.strip()
 
 print(f"Found {len(matches)} high-confidence matches.")
+print(f"Extracted {len(email_matches)} email addresses for matched customers.")
 
 matched_rebate_numbers = set()
 if matches:
@@ -210,14 +355,29 @@ if matches:
 """
 
 # Cell 5: Feature Engineering (Optimized)
-feature_engineering_code = r"""print("\n--- Feature Engineering: Add Graywater Flag ---")
+feature_engineering_code = r"""print("\n--- Feature Engineering: Add Graywater Flag and Email Addresses ---")
 
 if 'matched_rebate_numbers' not in locals():
     print("Error: 'matched_rebate_numbers' not found. Run fuzzy matching cell first.")
 else:
     df_master = pd.read_csv('cleaned_master_data.csv', low_memory=False)
     df_master['Rebate Number'] = df_master['Rebate Number'].astype(str)
+    
+    # Add graywater participation flag
     df_master['participated_in_graywater'] = df_master['Rebate Number'].isin(matched_rebate_numbers)
+    
+    # Add Email Address column and populate from graywater matches
+    df_master['Email Address'] = ''
+    if 'email_matches' in locals():
+        for rebate_num, email in email_matches.items():
+            mask = df_master['Rebate Number'] == rebate_num
+            df_master.loc[mask, 'Email Address'] = email
+        
+        emails_added = (df_master['Email Address'] != '').sum()
+        print(f"Successfully added {emails_added} email addresses from graywater matches.")
+    else:
+        print("Warning: 'email_matches' not found. Email addresses will be empty.")
+    
     df_master.to_csv('cleaned_master_data.csv', index=False)
     print(f"Successfully set 'participated_in_graywater' to True for {df_master['participated_in_graywater'].sum()} records.")
 """
@@ -226,7 +386,9 @@ else:
 header_0 = r"""# Rebate Recommendation Engine: Data Integration & Cleaning"""
 header_1 = r"""## Phase 1.1: Initial Data Preparation (Landscape)
 This section loads the core **Application List** and **Appliance Hardware** datasets, cleans them, and merges them into `cleaned_master_data.csv`."""
-header_2 = r"""## Phase 1.2: Graywater Integration - Direct Match Attempt
+header_1_5 = r"""## Phase 1.2: Include All Graywater Customers
+This critical step ensures that ALL graywater rebate participants are included in the master dataset, not just those who also participated in landscape rebates. This prevents the exclusion of graywater-only customers from the recommendation engine and analytics."""
+header_2 = r"""## Phase 1.3: Graywater Integration - Direct Match Attempt
 This section attempts to find overlap between the landscape and graywater datasets using direct identifier matching (`Rebate Number`, `LRP Rebate Number`)."""
 header_3 = r"""## Phase 1.3: Graywater Integration - Fuzzy Logic Matching
 This section uses a fuzzy matching algorithm on customer names and addresses to find high-confidence links between the two datasets. It concludes by creating a `set` of matched rebate numbers for use in the next step."""
@@ -245,7 +407,8 @@ rebate_mapping = {
     'I': 'has_irrigation_upgrade_rebate', # Irrigation Equipment Upgrade
     'L': 'has_landscape_conversion_rebate', # Landscape Conversion
     'R': 'has_rainwater_capture_rebate', # Rainwater Capture
-    'D': 'has_drip_conversion_rebate' # Drip Irrigation Conversion
+    'D': 'has_drip_conversion_rebate', # Drip Irrigation Conversion
+    'G': 'has_graywater_rebate' # Graywater Rebate (for graywater-only customers)
 }
 
 print("Creating new boolean columns for each sub-rebate based on 'RebateType'...")
@@ -380,6 +543,7 @@ rebate_name_map = {
     'has_landscape_conversion_rebate': 'Landscape Conversion Rebate',
     'has_rainwater_capture_rebate': 'Rainwater Capture Rebate',
     'has_wbic_rebate': 'WBIC Rebate',
+    'has_graywater_rebate': 'Graywater Rebate',
     'participated_in_graywater': 'Graywater Rebate'
 }
 
@@ -516,8 +680,20 @@ adv_model_prep_code = r"""print("--- Preparing Data for Advanced Model ---")
 # Load the dataset
 df = pd.read_csv('cleaned_master_data.csv', low_memory=False)
 
-# Ensure 'Request Date' is in datetime format
-df['Request Date'] = pd.to_datetime(df['Request Date'])
+# Robustly parse 'Request Date' to handle mixed formats (MM/DD/YYYY, YYYY-MM-DD, etc.)
+from datetime import datetime
+def robust_parse_date(date_str):
+    for fmt in ("%Y-%m-%d", "%m/%d/%Y", "%Y/%m/%d", "%d-%b-%Y"):
+        try:
+            return datetime.strptime(str(date_str), fmt)
+        except (ValueError, TypeError):
+            continue
+    try:
+        return pd.to_datetime(str(date_str), errors='coerce')
+    except Exception:
+        return pd.NaT
+df['Request Date'] = df['Request Date'].apply(robust_parse_date)
+
 
 # --- Create the user-item interaction data ---
 # We need to melt the dataframe to get a user-item-rating format
@@ -1202,6 +1378,8 @@ def build_notebook():
         (None, imports_code),
         (header_1, None),
         (None, data_prep_code),
+        (header_1_5, None),
+        (None, graywater_inclusion_code),
         (header_2, None),
         (None, graywater_analysis_code),
         (header_3, None),

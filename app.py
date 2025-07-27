@@ -441,7 +441,8 @@ async def get_filtered_customers(
                 'site_type': customer.get('Site Type', ''),
                 'email': customer.get('Email Address', ''),
                 'request_date': request_date_str,
-                'request_year': request_year
+                'request_year': request_year,
+                'rebate_count': customer.get('rebate_count', 0)
             })
         
         return {
@@ -483,8 +484,8 @@ async def export_filtered_customers(
         if missing_rebate and missing_rebate in rebate_columns:
             filtered_df = filtered_df[filtered_df[missing_rebate] == 0]
         
-        # Select export columns (including date fields)
-        export_columns = ['Site ID', 'Customer Name', 'City', 'Site Type', 'Email Address', 'Request Date']
+        # Select export columns (including date fields and rebate_count)
+        export_columns = ['Site ID', 'Customer Name', 'City', 'Site Type', 'Email Address', 'Request Date', 'rebate_count']
         export_df = filtered_df[export_columns].copy()
         
         # Add request_year column for consistency with API response
