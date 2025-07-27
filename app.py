@@ -351,16 +351,16 @@ async def get_site_type_popularity():
 async def get_correlation_matrix():
     """Get rebate correlation matrix for heatmap visualization."""
     try:
-        # Convert correlation matrix to format suitable for heatmap
+        # Clean correlation matrix to ensure JSON compliance
+        corr_clean = correlation_matrix.replace([np.inf, -np.inf], np.nan).fillna(0)
         correlation_data = []
-        for rebate1 in correlation_matrix.index:
-            for rebate2 in correlation_matrix.columns:
+        for rebate1 in corr_clean.index:
+            for rebate2 in corr_clean.columns:
                 correlation_data.append({
                     'rebate1': rebate_name_map.get(rebate1, rebate1),
                     'rebate2': rebate_name_map.get(rebate2, rebate2),
-                    'correlation': round(correlation_matrix.loc[rebate1, rebate2], 3)
+                    'correlation': round(corr_clean.loc[rebate1, rebate2], 3)
                 })
-        
         return correlation_data
     except Exception as e:
         logger.error(f"Error getting correlation matrix: {e}")
