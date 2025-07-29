@@ -238,9 +238,14 @@ if not df_graywater.empty:
             rebate_number = gw_customer.get('LRP Rebate Number', f"GW_{gw_customer.get('Rebate Number', 'UNKNOWN')}")
             
             # Create new record with available graywater data
+            # SURGICAL FIX: Use Rebate Number as Site ID if Site ID is missing/blank
+            site_id = gw_customer.get('Site ID', '')
+            if not site_id or pd.isna(site_id) or str(site_id).strip() == '':
+                site_id = str(gw_customer.get('Rebate Number', ''))
+            
             new_record = {
                 'Rebate Number': rebate_number,
-                'Site ID': gw_customer.get('Site ID', ''),  # May be empty
+                'Site ID': site_id,  # Uses Rebate Number as fallback for blank Site IDs
                 'Customer Name': gw_customer.get('Customer Name', ''),
                 'Site Type': gw_customer.get('Site Type', ''),
                 'City': gw_customer.get('City', ''),
