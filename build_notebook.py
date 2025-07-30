@@ -448,6 +448,10 @@ for col in rebate_cols_for_count:
 # Calculate rebate_count as the sum of True values across all rebate columns
 df_master['rebate_count'] = df_master[rebate_cols_for_count].sum(axis=1)
 print(f"  - Created 'rebate_count' column with values ranging from {df_master['rebate_count'].min()} to {df_master['rebate_count'].max()}")
+
+# NOW detect rebate columns for analytics (after they're actually created)
+rebate_columns = [col for col in df_master.columns if col.startswith('has_') or col == 'participated_in_graywater']
+print(f"\nDetected rebate columns for analytics: {rebate_columns}")
 print(f"  - Average rebates per customer: {df_master['rebate_count'].mean():.2f}")
 
 # Save the final, fully-featured dataset
@@ -1202,11 +1206,7 @@ analytics_prep_code = r"""
 print("=== ANALYTICS DATA PREPARATION ===")
 print("Preparing pre-computed analytics for dashboard performance...")
 
-# Define rebate columns for analytics
-rebate_columns = [
-    'has_wbic_rebate', 'has_irrigation_upgrade_rebate', 'has_landscape_conversion_rebate',
-    'has_drip_conversion_rebate', 'has_rainwater_capture_rebate', 'participated_in_graywater'
-]
+# rebate_columns is now defined earlier in the notebook after rebate columns are created
 
 # 1. City-level popularity statistics
 print("\n1. Computing city-level rebate popularity...")
