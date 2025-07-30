@@ -15143,51 +15143,51 @@ Rebate Number,Site ID,Customer Name,Site Type,City,Site Zip Code,Request Date,Re
 1453.0,10,JAMES BLEAKLEY,Single Family,Los Altos,94024,2010-07-26,Check Issued,L,False,,False,False,True,False,False,False,1
 1450.0,9,MOUNTAIN VIEW WEST #1 HOA,MFD,Mountain View,00nan,2011-07-09,Check Issued,IW,False,,True,True,False,False,False,False,2
 1446.0,5,BERESFORD MASTER ASSOCIATION,MFD,Milpitas,00nan,2010-07-02,Check Issued,W,False,,True,False,False,False,False,False,1
-71066.0,425015,JUDY ANDERSON-HAMED,Single Family,Morgan Hill,95037,2025-06-24,Appl. Received Complete,,False,,False,False,False,False,False,False,0
-71065.0,424876,RAGHAVENDER PILLUTLA,Single Family,Mountain View,94040,2025-06-24,Appl. Received Complete,,False,,False,False,False,False,False,False,0
+71066.0,425015,JUDY ANDERSON-HAMED,Single Family,Morgan Hill,95037,2025-06-24,Appl. Received Complete,nan,False,,False,False,False,False,False,False,0
+71065.0,424876,RAGHAVENDER PILLUTLA,Single Family,Mountain View,94040,2025-06-24,Appl. Received Complete,nan,False,,False,False,False,False,False,False,0
 71062.0,424601,CRAIG SO,Single Family,Morgan Hill,95037,2025-06-23,Appl. Received Complete,I,False,,False,True,False,False,False,False,1
-71056.0,424599,ANG LI,Single Family,San Jose,95126,2025-06-21,Appl. Received Complete,,False,,False,False,False,False,False,False,0
+71056.0,424599,ANG LI,Single Family,San Jose,95126,2025-06-21,Appl. Received Complete,nan,False,,False,False,False,False,False,False,0
 71054.0,424598,AASHISH PANT,Single Family,Saratoga,95070,2025-06-22,Appl. Received Complete,W,False,,True,False,False,False,False,False,1
 71053.0,424597,BEN YUAN,Single Family,Campbell,95008,2025-06-22,Notice to Proceed Sent,W,False,,True,False,False,False,False,False,1
-71044.0,424595,XIAOHUA MA,Single Family,Sunnyvale,94086,2025-06-19,Appl. Received Complete,,False,,False,False,False,False,False,False,0
-71042.0,424594,BART LOCSIN,Single Family,Morgan Hill,95037,2025-06-20,Appl. Received Complete,,False,,False,False,False,False,False,False,0
-71038.0,424739,SARITH LY,Single Family,San Jose,95119,2025-06-24,Appl. Received Complete,,False,,False,False,False,False,False,False,0
+71044.0,424595,XIAOHUA MA,Single Family,Sunnyvale,94086,2025-06-19,Appl. Received Complete,nan,False,,False,False,False,False,False,False,0
+71042.0,424594,BART LOCSIN,Single Family,Morgan Hill,95037,2025-06-20,Appl. Received Complete,nan,False,,False,False,False,False,False,False,0
+71038.0,424739,SARITH LY,Single Family,San Jose,95119,2025-06-24,Appl. Received Complete,nan,False,,False,False,False,False,False,False,0
 71037.0,424864,LING HUANG,Single Family,Palo Alto,94303,2025-06-24,Appl. Received Complete,IW,False,,True,True,False,False,False,False,2
 71036.0,424586,STEVE SCANDALIS,Single Family,Sunnyvale,94087,2025-06-23,Notice to Proceed Sent,IW,False,,True,True,False,False,False,False,2
-71035.0,425138,LAUREN TANG,Single Family,Los Altos,94024,2025-06-25,Appl. Received Complete,,False,,False,False,False,False,False,False,0
+71035.0,425138,LAUREN TANG,Single Family,Los Altos,94024,2025-06-25,Appl. Received Complete,nan,False,,False,False,False,False,False,False,0
 71031.0,424462,YUANYING DIAO,Single Family,Los Gatos,95032,2025-06-18,Post Insp. Approved,W,False,,True,False,False,False,False,False,1
-71028.0,424585,ROBERT ADAMS,Single Family,San Jose,95126,2025-06-20,Appl. Received Complete,,False,,False,False,False,False,False,False,0
-71027.0,424584,CECILIA LE,Single Family,Milpitas,95035,2025-06-22,Appl. Received Complete,,False,,False,False,False,False,False,False,0
+71028.0,424585,ROBERT ADAMS,Single Family,San Jose,95126,2025-06-20,Appl. Received Complete,nan,False,,False,False,False,False,False,False,0
+71027.0,424584,CECILIA LE,Single Family,Milpitas,95035,2025-06-22,Appl. Received Complete,nan,False,,False,False,False,False,False,False,0
 71025.0,424460,SHEILA SNAVELY,Single Family,San Jose,95118,2025-06-17,Appl. Received Complete,W,False,,True,False,False,False,False,False,1
 71024.0,424459,KIM CHANG,Single Family,San Jose,95126,2025-06-17,Notice to Proceed Sent,IW,False,,True,True,False,False,False,False,2
-71023.0,424582,DILSHAD KHERAJ,Single Family,San Jose,95123,2025-06-22,Appl. Received Complete,,False,,False,False,False,False,False,False,0
-71022.0,424581,CHRISTOPHER HAMM,Single Family,San Jose,95125,2025-06-18,Appl. Received Complete,,False,,False,False,False,False,False,False,0
-71019.0,420272,VITALY FELDMAN,Single Family,Mountain View,94041,2025-06-17,Appl. Received Complete,,False,,False,False,False,False,False,False,0
+71023.0,424582,DILSHAD KHERAJ,Single Family,San Jose,95123,2025-06-22,Appl. Received Complete,nan,False,,False,False,False,False,False,False,0
+71022.0,424581,CHRISTOPHER HAMM,Single Family,San Jose,95125,2025-06-18,Appl. Received Complete,nan,False,,False,False,False,False,False,False,0
+71019.0,420272,VITALY FELDMAN,Single Family,Mountain View,94041,2025-06-17,Appl. Received Complete,nan,False,,False,False,False,False,False,False,0
 71018.0,424328,KOKO SU,Single Family,San Jose,95138,2025-06-16,Notice to Proceed Sent,W,False,,True,False,False,False,False,False,1
 71017.0,424457,TING REAL ESTATE SERVICES,Single Family,San Jose,95118,2025-06-17,Notice to Proceed Sent,W,False,,True,False,False,False,False,False,1
-71015.0,424326,EXPRESSIONS OF SUNNYVALE HOMEOWNERS ASSOCIATION,MFD,Sunnyvale,00nan,2025-06-16,Appl. Received Complete,,False,,False,False,False,False,False,False,0
-71013.0,424454,WILSON LI,Single Family,Cupertino,95014,2025-06-17,Appl. Received Complete,,False,,False,False,False,False,False,False,0
-71008.0,424577,KATHLEEN KELLERMAN,Single Family,Gilroy,95020,2025-06-18,Appl. Received Complete,,False,,False,False,False,False,False,False,0
+71015.0,424326,EXPRESSIONS OF SUNNYVALE HOMEOWNERS ASSOCIATION,MFD,Sunnyvale,00nan,2025-06-16,Appl. Received Complete,nan,False,,False,False,False,False,False,False,0
+71013.0,424454,WILSON LI,Single Family,Cupertino,95014,2025-06-17,Appl. Received Complete,nan,False,,False,False,False,False,False,False,0
+71008.0,424577,KATHLEEN KELLERMAN,Single Family,Gilroy,95020,2025-06-18,Appl. Received Complete,nan,False,,False,False,False,False,False,False,0
 71007.0,265495,JACOB ANTHIAH BASHYAM,Single Family,Santa Clara,95051,2025-06-16,Post Insp. Approved,IW,False,,True,True,False,False,False,False,2
-71006.0,424576,CATHY CHEUNG,Single Family,Santa Clara,95050,2025-06-18,Appl. Received Complete,,False,,False,False,False,False,False,False,0
-71005.0,424324,ZHISHENG ZHOU,Single Family,Santa Clara,95051,2025-06-15,Appl. Received Complete,,False,,False,False,False,False,False,False,0
+71006.0,424576,CATHY CHEUNG,Single Family,Santa Clara,95050,2025-06-18,Appl. Received Complete,nan,False,,False,False,False,False,False,False,0
+71005.0,424324,ZHISHENG ZHOU,Single Family,Santa Clara,95051,2025-06-15,Appl. Received Complete,nan,False,,False,False,False,False,False,False,0
 71003.0,348682,CHI-CHU TSCHANG,Single Family,San Jose,95112,2025-06-16,Notice to Proceed Sent,W,False,,True,False,False,False,False,False,1
-71002.0,424322,RUIYA YANG,Single Family,Santa Clara,95051,2025-06-15,Appl. Received Complete,,False,,False,False,False,False,False,False,0
-70999.0,424146,SHAD JESSEL,Single Family,Gilroy,95020,2025-06-15,Appl. Received Complete,,False,,False,False,False,False,False,False,0
-70998.0,424145,VISHWANATHAN SWAMINATHAN,Single Family,Saratoga,95070,2025-06-15,Appl. Received Complete,,False,,False,False,False,False,False,False,0
-70997.0,2661,JIE WU,Single Family,San Jose,95128,2025-06-14,Appl. Received Complete,,False,,False,False,False,False,False,False,0
+71002.0,424322,RUIYA YANG,Single Family,Santa Clara,95051,2025-06-15,Appl. Received Complete,nan,False,,False,False,False,False,False,False,0
+70999.0,424146,SHAD JESSEL,Single Family,Gilroy,95020,2025-06-15,Appl. Received Complete,nan,False,,False,False,False,False,False,False,0
+70998.0,424145,VISHWANATHAN SWAMINATHAN,Single Family,Saratoga,95070,2025-06-15,Appl. Received Complete,nan,False,,False,False,False,False,False,False,0
+70997.0,2661,JIE WU,Single Family,San Jose,95128,2025-06-14,Appl. Received Complete,nan,False,,False,False,False,False,False,False,0
 70994.0,424143,ARPITKUMAR SHAH,Single Family,Mountain View,94040,2025-06-14,Appl. Received Complete,I,False,,False,True,False,False,False,False,1
-70993.0,424142,WYATT LIAO,Single Family,San Jose,95132,2025-06-14,Appl. Received Complete,,False,,False,False,False,False,False,False,0
+70993.0,424142,WYATT LIAO,Single Family,San Jose,95132,2025-06-14,Appl. Received Complete,nan,False,,False,False,False,False,False,False,0
 70992.0,424141,LING XU,Single Family,Saratoga,95070,2025-06-14,Appl. Received Complete,I,False,,False,True,False,False,False,False,1
 70990.0,289909,RICHARD TANG,Single Family,Saratoga,95070,2025-06-13,Notice to Proceed Sent,W,False,,True,False,False,False,False,False,1
-70989.0,424139,VINCENT TSO,Single Family,Milpitas,95035,2025-06-12,Appl. Received Complete,,False,,False,False,False,False,False,False,0
-70959.0,424442,CHRISTINE HERNANDEZ,Single Family,San Jose,95148,2025-06-17,Appl. Received Complete,,False,,False,False,False,False,False,False,0
+70989.0,424139,VINCENT TSO,Single Family,Milpitas,95035,2025-06-12,Appl. Received Complete,nan,False,,False,False,False,False,False,False,0
+70959.0,424442,CHRISTINE HERNANDEZ,Single Family,San Jose,95148,2025-06-17,Appl. Received Complete,nan,False,,False,False,False,False,False,False,0
 70863.0,424563,ELIZABETH GEHRIG,Single Family,San Jose,95123,2025-06-20,Appl. Received Complete,W,False,,True,False,False,False,False,False,1
 70749.0,424183,CLAUDIA LIN,Single Family,Cupertino,95014,2025-06-12,Notice to Proceed Sent,I,False,,False,True,False,False,False,False,1
-70706.0,424301,SIENA AT SARATOGA OWNERS ASSOCIATION,MFD,San Jose,00nan,2025-06-15,Appl. Received Complete,,False,,False,False,False,False,False,False,0
-68889.0,424168,ROGELIO RAMOS,Single Family,Gilroy,95020,2025-06-14,Appl. Received Complete,,False,,False,False,False,False,False,False,0
+70706.0,424301,SIENA AT SARATOGA OWNERS ASSOCIATION,MFD,San Jose,00nan,2025-06-15,Appl. Received Complete,nan,False,,False,False,False,False,False,False,0
+68889.0,424168,ROGELIO RAMOS,Single Family,Gilroy,95020,2025-06-14,Appl. Received Complete,nan,False,,False,False,False,False,False,False,0
 67690.0,424203,LEO BLUME,Single Family,Palo Alto,94303,2025-06-14,Notice to Proceed Sent,IW,False,,True,True,False,False,False,False,2
-61844.0,13319,PAUL T YUE,Single Family,San Jose,95148,2025-06-22,Appl. Received Complete,,False,,False,False,False,False,False,False,0
+61844.0,13319,PAUL T YUE,Single Family,San Jose,95148,2025-06-22,Appl. Received Complete,nan,False,,False,False,False,False,False,False,0
 ,1096,Thinh Le,Single Family,San Jose,95127,06/18/2025,Submitted,G,False,,False,False,False,False,False,True,1
 ,1095,Arpitkumar Shah,Single Family,Mountain View,94040-4001,06/14/2025,Pending,G,False,,False,False,False,False,False,True,1
 ,1094,Brajesh UPADHYAY,Single Family,San Jose,95120-4116,06/09/2025,Submitted,G,False,,False,False,False,False,False,True,1
