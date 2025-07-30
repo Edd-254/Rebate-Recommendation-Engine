@@ -421,7 +421,16 @@ print("Creating new boolean columns for each sub-rebate based on 'RebateType'...
 df_master['RebateType'] = df_master['RebateType'].astype(str)
 
 for code, new_col in rebate_mapping.items():
-    df_master[new_col] = df_master['RebateType'].str.contains(code, na=False)
+    if code == 'G':  # Special handling for graywater to avoid false positives
+        # Only flag as graywater if:
+        # 1. RebateType is exactly 'G' (graywater-only customers), OR
+        # 2. participated_in_graywater is True (fuzzy matched customers)
+        df_master[new_col] = (
+            (df_master['RebateType'] == 'G') |
+            (df_master.get('participated_in_graywater', False) == True)
+        )
+    else:
+        df_master[new_col] = df_master['RebateType'].str.contains(code, na=False)
     print(f"  - Created '{new_col}' with {df_master[new_col].sum()} participants.")
 
 # Add rebate_count column - sum of all six boolean rebate columns
