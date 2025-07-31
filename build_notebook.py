@@ -238,16 +238,19 @@ if not df_graywater.empty:
             rebate_number = gw_customer.get('LRP Rebate Number', f"GW_{gw_customer.get('Rebate Number', 'UNKNOWN')}")
             
             # Create new record with available graywater data
-            # CRITICAL FIX: Use prefixed Rebate Number as Site ID to prevent collisions
+            # NUMERIC SITE ID ASSIGNMENT: Use high numeric range for graywater-only customers
             site_id = gw_customer.get('Site ID', '')
             if not site_id or pd.isna(site_id) or str(site_id).strip() == '':
-                # Prefix with 'GW_' to guarantee uniqueness and prevent collisions with existing Site IDs
-                rebate_num = str(gw_customer.get('Rebate Number', 'UNKNOWN'))
-                site_id = f"GW_{rebate_num}"
+                # Assign numeric Site ID starting from 900000 to avoid collisions
+                # Use rebate number offset to ensure uniqueness
+                rebate_num = gw_customer.get('Rebate Number', 0)
+                if pd.isna(rebate_num):
+                    rebate_num = 0
+                site_id = 900000 + int(rebate_num)
             
             new_record = {
                 'Rebate Number': rebate_number,
-                'Site ID': site_id,  # Uses Rebate Number as fallback for blank Site IDs
+                'Site ID': site_id,
                 'Customer Name': gw_customer.get('Customer Name', ''),
                 'Site Type': gw_customer.get('Site Type', ''),
                 'City': gw_customer.get('City', ''),
@@ -1226,33 +1229,29 @@ if len(duplicate_site_ids) > 0:
     changes_made = 0
     
     for site_id, group in duplicate_groups:
-        # Skip GW_-prefixed Site IDs - these are legitimate graywater duplicates
-        if str(site_id).startswith('GW_'):
+        # Skip high numeric Site IDs (900000+) - these are graywater customers
+        if str(site_id).isdigit() and int(site_id) >= 900000:
             print(f"\n  Skipping Site ID {site_id} - legitimate graywater customer with multiple applications")
             continue
             
-        # Find graywater customers in this group (only for non-GW Site IDs)
+        # Find graywater customers in this group (only for regular Site IDs)
         graywater_customers = group[group['has_graywater_rebate'] == True]
         
         if len(graywater_customers) > 0:
             print(f"\n  Fixing Site ID {site_id} (has {len(graywater_customers)} graywater customers colliding with regular customers)")
             
-            # Update Site IDs for graywater customers to use GW_ prefix
+            # Update Site IDs for graywater customers to use high numeric range
             for idx, customer in graywater_customers.iterrows():
-                rebate_number = customer.get('Rebate Number', 'UNKNOWN')
-                if pd.isna(rebate_number) or str(rebate_number) == 'nan':
-                    # Use original Site ID with GW prefix if no rebate number
-                    new_site_id = f"GW_{site_id}"
-                else:
-                    # Use rebate number with GW prefix
-                    new_site_id = f"GW_{str(rebate_number).replace('.0', '')}"
+                rebate_number = customer.get('Rebate Number', 0)
+                if pd.isna(rebate_number):
+                    rebate_number = 0
                 
-                # Ensure uniqueness by adding suffix if needed
-                counter = 1
-                original_new_site_id = new_site_id
+                # Assign numeric Site ID starting from 900000
+                new_site_id = 900000 + int(rebate_number)
+                
+                # Ensure uniqueness by incrementing if needed
                 while new_site_id in df_master['Site ID'].values:
-                    new_site_id = f"{original_new_site_id}_{counter}"
-                    counter += 1
+                    new_site_id += 1
                 
                 # Update the Site ID
                 df_master.loc[idx, 'Site ID'] = new_site_id
@@ -1278,6 +1277,8 @@ if len(final_duplicates) == 0:
 else:
     print(f"WARNING: {len(final_duplicates)} duplicate Site IDs still remain")
     print("Remaining duplicates may be legitimate (same customer, multiple rebates)")
+
+
 
 # Re-save the cleaned data with fixed Site IDs
 output_path = 'cleaned_master_data.csv'
