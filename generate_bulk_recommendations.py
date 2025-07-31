@@ -78,26 +78,33 @@ def get_svd_recommendations(site_id: str, top_k: int = 5) -> List[Dict[str, Any]
         if user_data.empty:
             return []
         
-        # Get user's existing rebates
-        user_rebates = []
+        # Get user's existing rebates (by rebate_name to handle duplicates)
+        user_rebate_names = set()
         for rebate in rebate_columns:
             if rebate in user_data.columns and user_data[rebate].iloc[0] == 1:
-                user_rebates.append(rebate)
+                rebate_name = rebate_name_map.get(rebate, rebate)
+                user_rebate_names.add(rebate_name)
         
         # Generate predictions for rebates user doesn't have
         recommendations = []
+        seen_rebate_names = set()  # Track to avoid duplicates
+        
         for rebate in rebate_columns:
-            if rebate not in user_rebates:
+            rebate_name = rebate_name_map.get(rebate, rebate)
+            
+            # Skip if user already has this rebate or we've already added this rebate_name
+            if rebate_name not in user_rebate_names and rebate_name not in seen_rebate_names:
                 try:
                     # Use SVD to predict rating for this rebate
                     prediction = svd_model.predict(site_id, rebate)
                     recommendations.append({
                         'rebate_code': rebate,
-                        'rebate_name': rebate_name_map.get(rebate, rebate),
+                        'rebate_name': rebate_name,
                         'score': round(prediction.est, 3),
                         'reason': 'Collaborative filtering prediction',
                         'model_used': 'svd'
                     })
+                    seen_rebate_names.add(rebate_name)
                 except Exception:
                     continue
         
@@ -115,15 +122,18 @@ def get_hybrid_recommendations(site_id: str, top_k: int = 5) -> List[Dict[str, A
         # Get SVD recommendations as base
         svd_recs = get_svd_recommendations(site_id, top_k * 2)  # Get more for hybrid processing
         
-        # Get user's existing rebates for correlation boosting
+        # Get user's existing rebates for correlation boosting (by rebate_name to handle duplicates)
         user_data = df_cleaned[df_cleaned['Site ID'] == site_id]
         if user_data.empty:
             return get_baseline_recommendations(site_id, top_k)
         
-        user_rebates = []
+        user_rebates = []  # Keep original rebate codes for correlation matrix lookup
+        user_rebate_names = set()  # Track rebate names to avoid recommending duplicates
         for rebate in rebate_columns:
             if rebate in user_data.columns and user_data[rebate].iloc[0] == 1:
                 user_rebates.append(rebate)
+                rebate_name = rebate_name_map.get(rebate, rebate)
+                user_rebate_names.add(rebate_name)
         
         # Apply hybrid logic to SVD recommendations
         hybrid_recs = []

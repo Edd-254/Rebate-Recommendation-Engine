@@ -238,10 +238,12 @@ if not df_graywater.empty:
             rebate_number = gw_customer.get('LRP Rebate Number', f"GW_{gw_customer.get('Rebate Number', 'UNKNOWN')}")
             
             # Create new record with available graywater data
-            # SURGICAL FIX: Use Rebate Number as Site ID if Site ID is missing/blank
+            # CRITICAL FIX: Use prefixed Rebate Number as Site ID to prevent collisions
             site_id = gw_customer.get('Site ID', '')
             if not site_id or pd.isna(site_id) or str(site_id).strip() == '':
-                site_id = str(gw_customer.get('Rebate Number', ''))
+                # Prefix with 'GW_' to guarantee uniqueness and prevent collisions with existing Site IDs
+                rebate_num = str(gw_customer.get('Rebate Number', 'UNKNOWN'))
+                site_id = f"GW_{rebate_num}"
             
             new_record = {
                 'Rebate Number': rebate_number,
@@ -460,7 +462,7 @@ output_path = 'cleaned_master_data.csv'
 df_master.to_csv(output_path, index=False)
 
 print(f"\nFully enriched master dataset saved to '{output_path}'.")
-print("The dataset is now ready for Exploratory Data Analysis (EDA).")"""
+print("The dataset is now ready for Site ID cleanup and EDA.")"""
 
 # --- New Markdown Header ---
 header_5 = r"""## Phase 1.5: Feature Engineering - Deconstruct RebateType
@@ -1198,6 +1200,91 @@ print("\nSaved city coordinates to 'city_coordinates.csv'")
 print(city_coordinates_df.head())
 """
 
+# --- Site ID Cleanup for Duplicates ---
+header_site_id_cleanup = "## 7. Site ID Cleanup - Fix Duplicate Site IDs"
+
+site_id_cleanup_code = r"""
+# CRITICAL: Fix existing duplicate Site IDs caused by graywater-only customers
+print("=== SITE ID CLEANUP - FIXING DUPLICATES ===")
+print("Identifying and fixing duplicate Site IDs...")
+
+# Check for duplicate Site IDs before cleanup
+print(f"\nBEFORE CLEANUP:")
+print(f"Total records: {len(df_master)}")
+print(f"Unique Site IDs: {df_master['Site ID'].nunique()}")
+
+duplicate_site_ids = df_master[df_master.duplicated(subset=['Site ID'], keep=False)]
+print(f"Records with duplicate Site IDs: {len(duplicate_site_ids)}")
+
+if len(duplicate_site_ids) > 0:
+    print("\nFIXING DUPLICATE SITE IDs...")
+    
+    # Group duplicates by Site ID
+    duplicate_groups = duplicate_site_ids.groupby('Site ID')
+    
+    # Track changes
+    changes_made = 0
+    
+    for site_id, group in duplicate_groups:
+        # Skip GW_-prefixed Site IDs - these are legitimate graywater duplicates
+        if str(site_id).startswith('GW_'):
+            print(f"\n  Skipping Site ID {site_id} - legitimate graywater customer with multiple applications")
+            continue
+            
+        # Find graywater customers in this group (only for non-GW Site IDs)
+        graywater_customers = group[group['has_graywater_rebate'] == True]
+        
+        if len(graywater_customers) > 0:
+            print(f"\n  Fixing Site ID {site_id} (has {len(graywater_customers)} graywater customers colliding with regular customers)")
+            
+            # Update Site IDs for graywater customers to use GW_ prefix
+            for idx, customer in graywater_customers.iterrows():
+                rebate_number = customer.get('Rebate Number', 'UNKNOWN')
+                if pd.isna(rebate_number) or str(rebate_number) == 'nan':
+                    # Use original Site ID with GW prefix if no rebate number
+                    new_site_id = f"GW_{site_id}"
+                else:
+                    # Use rebate number with GW prefix
+                    new_site_id = f"GW_{str(rebate_number).replace('.0', '')}"
+                
+                # Ensure uniqueness by adding suffix if needed
+                counter = 1
+                original_new_site_id = new_site_id
+                while new_site_id in df_master['Site ID'].values:
+                    new_site_id = f"{original_new_site_id}_{counter}"
+                    counter += 1
+                
+                # Update the Site ID
+                df_master.loc[idx, 'Site ID'] = new_site_id
+                changes_made += 1
+                
+                customer_name = customer['Customer Name']
+                print(f"    Updated: {customer_name[:30]}... -> {new_site_id}")
+    
+    print(f"\nCLEANUP COMPLETE: Updated {changes_made} Site IDs")
+else:
+    print("\nNo duplicate Site IDs found - no cleanup needed")
+
+# Verify cleanup results
+print(f"\nAFTER CLEANUP:")
+print(f"Total records: {len(df_master)}")
+print(f"Unique Site IDs: {df_master['Site ID'].nunique()}")
+
+final_duplicates = df_master[df_master.duplicated(subset=['Site ID'], keep=False)]
+print(f"Records with duplicate Site IDs: {len(final_duplicates)}")
+
+if len(final_duplicates) == 0:
+    print("SUCCESS: All Site IDs are now unique!")
+else:
+    print(f"WARNING: {len(final_duplicates)} duplicate Site IDs still remain")
+    print("Remaining duplicates may be legitimate (same customer, multiple rebates)")
+
+# Re-save the cleaned data with fixed Site IDs
+output_path = 'cleaned_master_data.csv'
+df_master.to_csv(output_path, index=False)
+print(f"\nUpdated master dataset with fixed Site IDs saved to '{output_path}'.")
+"""
+
 # --- Analytics Data Preparation ---
 header_analytics = "## 8. Analytics Data Preparation for Dashboard"
 
@@ -1402,6 +1489,8 @@ def build_notebook():
         (None, feature_engineering_code),
         (header_5, None),
         (None, rebate_type_engineering_code),
+        (header_site_id_cleanup, None),
+        (None, site_id_cleanup_code),
         (header_eda_main, None),
         (header_2_1, None),
         (None, eda_code_2_1),
